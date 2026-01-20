@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KAUTZ Zeiterfassung V7</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #4a5d3f 0%, #7a8a6f 100%);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: #f5f1e8;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4a5d3f;
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+        }
+        
+        .user-info {
+            text-align: center;
+            color: #4a5d3f;
+            margin-bottom: 1.5rem;
+        }
+        
+        .user-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .logout-btn {
+            font-size: 0.9rem;
+            color: #7a8a6f;
+            text-decoration: underline;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+        
+        .timer-display {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+        
+        .timer-time {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #4a5d3f;
+            font-variant-numeric: tabular-nums;
+            margin-bottom: 0.5rem;
+        }
+        
+        .timer-status {
+            font-size: 1rem;
+            color: #7a8a6f;
+        }
+        
+        .auftrag-box {
+            background: #e8f4f8;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+        }
+        
+        .auftrag-box h3 {
+            color: #4a5d3f;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .auftrag-box p {
+            color: #555;
+            margin: 0.25rem 0;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 1.2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 0.5rem 0;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #4a5d3f;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #c44;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+        
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .pin-input {
+            font-size: 2rem;
+            text-align: center;
+            letter-spacing: 0.3rem;
+            padding-right: 0.3rem;
+            max-width: 100%;
+        }
+        
+        .heute-tag {
+            text-align: center;
+            color: #4a5d3f;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .pause-info {
+            background: #fff3cd;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+            font-weight: bold;
+            color: #856404;
+        }
+        
+        .zeit-info {
+            background: #fff;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .zeit-info-label {
+            color: #7a8a6f;
+            font-size: 0.9rem;
+        }
+        
+        .zeit-info-wert {
+            color: #4a5d3f;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="container">
+        <div class="card">
+            <h1>🌳 KAUTZ</h1>
+            <div class="user-info">Zeiterfassung</div>
+            
+            <div class="form-group">
+                <label>PIN eingeben:</label>
+                <input type="password" 
+                       id="pinInput" 
+                       class="pin-input" 
+                       maxlength="4" 
+                       inputmode="numeric"
+                       pattern="[0-9]*"
+                       placeholder="••••">
+            </div>
+            
+            <button class="btn btn-primary" onclick="login()">Anmelden</button>
+            
+            <div id="loginMessage"></div>
+        </div>
+    </div>
+
+    <!-- MAIN APP SCREEN -->
+    <div id="appScreen" class="container hidden">
+        <div class="card">
+            <h1>🌳 KAUTZ</h1>
+            <div class="user-info">
+                <div class="user-name" id="userName"></div>
+                <div class="logout-btn" onclick="logout()">Abmelden</div>
+            </div>
+            
+            <div class="heute-tag" id="heuteTag"></div>
+            
+            <!-- AUFTRAG ANZEIGE -->
+            <div id="auftragAnzeige" class="auftrag-box">
+                <h3 id="auftragTitle">Lade...</h3>
+                <p id="auftragKunde"></p>
+                <p id="auftragBeschreibung"></p>
+            </div>
+            
+            <!-- TIMER -->
+            <div class="timer-display">
+                <div class="timer-time" id="timerDisplay">00:00:00</div>
+                <div class="timer-status" id="timerStatus">Bereit</div>
+            </div>
+            
+            <!-- ZEIT INFOS -->
+            <div id="zeitInfos" class="hidden">
+                <div class="zeit-info">
+                    <span class="zeit-info-label">Von:</span>
+                    <span class="zeit-info-wert" id="vonZeit">--:--</span>
+                </div>
+                <div class="zeit-info">
+                    <span class="zeit-info-label">Bis:</span>
+                    <span class="zeit-info-wert" id="bisZeit">--:--</span>
+                </div>
+                <div class="zeit-info">
+                    <span class="zeit-info-label">Pause:</span>
+                    <span class="zeit-info-wert" id="pauseZeit">0h</span>
+                </div>
+            </div>
+            
+            <div id="pauseInfo" class="pause-info hidden"></div>
+            
+            <!-- BUTTONS -->
+            <button id="startBtn" class="btn btn-primary" onclick="timerStart()">▶ START</button>
+            <button id="stopBtn" class="btn btn-danger hidden" onclick="timerStop()">⏹ STOP</button>
+            
+            <div class="btn-row">
+                <button class="btn btn-warning" onclick="pauseToggle()">⏸ Pause</button>
+                <button class="btn btn-success" onclick="auftragErledigen()">✓ Erledigt</button>
+            </div>
+            
+            <div id="message"></div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'https://script.google.com/macros/s/AKfycbzUTv8-bwg0wLlqyGxZQPx1pWFyCBlqa3FYDMNhyLMoxkFR89IWRTQI3wAyueKYPEXVFw/exec';
+        
+        const PINS = {
+            '1111': 'Moritz',
+            '2222': 'Mike',
+            '3333': 'Johannes',
+            '4444': 'Paul',
+            '5555': 'Konstantin'
+        };
+        
+        let currentUser = null;
+        let currentAuftrag = null;
+        let timerInterval = null;
+        let startZeit = null;
+        let pauseStart = null;
+        let gesamtPause = 0;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('pinInput').focus();
+            document.getElementById('pinInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') login();
+            });
+            
+            const heute = new Date();
+            const tag = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'][heute.getDay()];
+            const datum = heute.toLocaleDateString('de-DE');
+            document.getElementById('heuteTag').textContent = `${tag}, ${datum}`;
+        });
+        
+        function formatZeit(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+        
+        function showMessage(text, type = 'info') {
+            const div = document.getElementById('message');
+            div.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => div.innerHTML = '', 5000);
+        }
+        
+        async function login() {
+            const pin = document.getElementById('pinInput').value;
+            
+            if (!PINS[pin]) {
+                showMessage('Ungültige PIN!', 'error');
+                document.getElementById('pinInput').value = '';
+                return;
+            }
+            
+            currentUser = PINS[pin];
+            document.getElementById('pinInput').value = '';
+            
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('appScreen').classList.remove('hidden');
+            document.getElementById('userName').textContent = currentUser;
+            
+            await ladePlanung();
+        }
+        
+        function logout() {
+            if (timerInterval) {
+                if (!confirm('Timer läuft! Wirklich abmelden?')) return;
+                clearInterval(timerInterval);
+            }
+            
+            currentUser = null;
+            currentAuftrag = null;
+            timerInterval = null;
+            startZeit = null;
+            pauseStart = null;
+            gesamtPause = 0;
+            
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('appScreen').classList.add('hidden');
+        }
+        
+        async function ladePlanung() {
+            try {
+                const heute = new Date();
+                const datum = `${heute.getFullYear()}-${String(heute.getMonth() + 1).padStart(2, '0')}-${String(heute.getDate()).padStart(2, '0')}`;
+                
+                const response = await fetch(`${API}?action=getAllePlanungen&datum=${datum}`);
+                const data = await response.json();
+                
+                if (data.success && data.planungen) {
+                    const meinePlanung = data.planungen.find(p => p.mitarbeiter === currentUser);
+                    
+                    if (meinePlanung) {
+                        // Hole vollständige Auftragsdaten
+                        const auftraegeResponse = await fetch(`${API}?action=alleAuftraege`);
+                        const auftraegeData = await auftraegeResponse.json();
+                        
+                        const auftrag = auftraegeData.auftraege.find(a => a.nr === meinePlanung.auftragNr);
+                        
+                        if (auftrag) {
+                            currentAuftrag = {
+                                nr: auftrag.nr,
+                                kunde: auftrag.kunde,
+                                telefon: auftrag.telefon || '',
+                                adresse: auftrag.adresse || '',
+                                beschreibung: auftrag.beschreibung || ''
+                            };
+                            
+                            document.getElementById('auftragTitle').textContent = `Heute eingeplant: ${auftrag.nr}`;
+                            
+                            let details = `<strong style="font-size: 1.1rem; color: #4a5d3f;">${auftrag.kunde}</strong><br>`;
+                            if (auftrag.telefon) details += `📞 ${auftrag.telefon}<br>`;
+                            if (auftrag.adresse) details += `📍 ${auftrag.adresse}<br>`;
+                            if (auftrag.beschreibung) details += `<small style="color: #7a8a6f;">${auftrag.beschreibung}</small>`;
+                            
+                            document.getElementById('auftragKunde').innerHTML = details;
+                            document.getElementById('auftragBeschreibung').textContent = '';
+                        } else {
+                            currentAuftrag = {
+                                nr: meinePlanung.auftragNr,
+                                kunde: meinePlanung.kunde,
+                                beschreibung: meinePlanung.notizen || ''
+                            };
+                            
+                            document.getElementById('auftragTitle').textContent = `${meinePlanung.auftragNr} - ${meinePlanung.kunde}`;
+                            document.getElementById('auftragKunde').textContent = meinePlanung.notizen || '';
+                            document.getElementById('auftragBeschreibung').textContent = '';
+                        }
+                    } else {
+                        document.getElementById('auftragTitle').textContent = 'Keine Planung für heute';
+                        document.getElementById('auftragKunde').textContent = 'Bitte Moritz kontaktieren!';
+                        document.getElementById('auftragBeschreibung').textContent = '';
+                        showMessage('Keine Planung gefunden!', 'error');
+                    }
+                }
+            } catch (error) {
+                showMessage('Fehler beim Laden: ' + error.message, 'error');
+            }
+        }
+        
+        function timerStart() {
+            if (!currentAuftrag) {
+                showMessage('Kein Auftrag eingeplant!', 'error');
+                return;
+            }
+            
+            startZeit = new Date();
+            document.getElementById('vonZeit').textContent = startZeit.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'});
+            
+            document.getElementById('startBtn').classList.add('hidden');
+            document.getElementById('stopBtn').classList.remove('hidden');
+            document.getElementById('zeitInfos').classList.remove('hidden');
+            document.getElementById('timerStatus').textContent = 'Läuft...';
+            
+            timerInterval = setInterval(() => {
+                const jetzt = new Date();
+                let vergangen = Math.floor((jetzt - startZeit) / 1000);
+                
+                if (pauseStart) {
+                    const pauseDauer = Math.floor((jetzt - pauseStart) / 1000);
+                    gesamtPause += pauseDauer;
+                    pauseStart = jetzt;
+                }
+                
+                vergangen -= Math.floor(gesamtPause / 1000);
+                document.getElementById('timerDisplay').textContent = formatZeit(vergangen);
+            }, 1000);
+        }
+        
+        async function timerStop() {
+            if (!startZeit) return;
+            
+            clearInterval(timerInterval);
+            timerInterval = null;
+            
+            const endZeit = new Date();
+            document.getElementById('bisZeit').textContent = endZeit.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'});
+            
+            const von = startZeit.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'});
+            const bis = endZeit.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'});
+            const pause = (gesamtPause / 3600).toFixed(2);
+            
+            try {
+                const heute = new Date().toLocaleDateString('de-DE');
+                
+                const url = `${API}?action=neueZeit` +
+                    `&mitarbeiter=${encodeURIComponent(currentUser)}` +
+                    `&auftragNr=${encodeURIComponent(currentAuftrag.nr)}` +
+                    `&von=${encodeURIComponent(von)}` +
+                    `&bis=${encodeURIComponent(bis)}` +
+                    `&pause=${encodeURIComponent(pause)}` +
+                    `&datum=${encodeURIComponent(heute)}`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage(`✓ ${data.zeit}h erfasst (${data.kosten.toFixed(2)} €)`, 'success');
+                    
+                    // Reset
+                    startZeit = null;
+                    gesamtPause = 0;
+                    pauseStart = null;
+                    
+                    document.getElementById('timerDisplay').textContent = '00:00:00';
+                    document.getElementById('timerStatus').textContent = 'Gespeichert!';
+                    document.getElementById('startBtn').classList.remove('hidden');
+                    document.getElementById('stopBtn').classList.add('hidden');
+                    document.getElementById('pauseInfo').classList.add('hidden');
+                    
+                    setTimeout(() => {
+                        document.getElementById('timerStatus').textContent = 'Bereit';
+                        document.getElementById('zeitInfos').classList.add('hidden');
+                    }, 3000);
+                } else {
+                    showMessage('Fehler: ' + (data.error || 'Unbekannt'), 'error');
+                }
+            } catch (error) {
+                showMessage('Verbindungsfehler: ' + error.message, 'error');
+            }
+        }
+        
+        function pauseToggle() {
+            if (!startZeit) {
+                showMessage('Timer nicht gestartet!', 'error');
+                return;
+            }
+            
+            if (!pauseStart) {
+                // Pause starten
+                pauseStart = new Date();
+                document.getElementById('pauseInfo').classList.remove('hidden');
+                document.getElementById('pauseInfo').textContent = '⏸ Pause läuft...';
+                showMessage('Pause gestartet', 'success');
+            } else {
+                // Pause beenden
+                const jetzt = new Date();
+                const pauseDauer = (jetzt - pauseStart) / 1000;
+                gesamtPause += pauseDauer;
+                
+                document.getElementById('pauseZeit').textContent = (gesamtPause / 3600).toFixed(2) + 'h';
+                document.getElementById('pauseInfo').classList.add('hidden');
+                
+                pauseStart = null;
+                showMessage('Pause beendet', 'success');
+            }
+        }
+        
+        async function auftragErledigen() {
+            if (!currentAuftrag) {
+                showMessage('Kein Auftrag aktiv!', 'error');
+                return;
+            }
+            
+            if (!confirm(`Auftrag ${currentAuftrag.nr} wirklich als erledigt markieren?`)) {
+                return;
+            }
+            
+            try {
+                // Status auf erledigt setzen
+                const url = `${API}?action=auftragBearbeiten` +
+                    `&nr=${encodeURIComponent(currentAuftrag.nr)}` +
+                    `&status=erledigt`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage(`✓ Auftrag ${currentAuftrag.nr} erledigt!`, 'success');
+                    
+                    // Lösche Planung für heute
+                    const heute = new Date();
+                    const datum = `${heute.getFullYear()}-${String(heute.getMonth() + 1).padStart(2, '0')}-${String(heute.getDate()).padStart(2, '0')}`;
+                    
+                    await fetch(`${API}?action=loeschePlanungen&datum=${datum}&mitarbeiter=${encodeURIComponent(currentUser)}`);
+                    
+                    // Neu laden nach 2 Sekunden
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    showMessage('Fehler: ' + (data.error || 'Unbekannt'), 'error');
+                }
+            } catch (error) {
+                showMessage('Verbindungsfehler: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
