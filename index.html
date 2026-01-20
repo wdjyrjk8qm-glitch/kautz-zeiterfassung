@@ -560,13 +560,7 @@
                 if (data.success) {
                     showMessage(`✓ Auftrag ${currentAuftrag.nr} erledigt!`, 'success');
                     
-                    // Lösche Planung für heute
-                    const heute = new Date();
-                    const datum = `${heute.getFullYear()}-${String(heute.getMonth() + 1).padStart(2, '0')}-${String(heute.getDate()).padStart(2, '0')}`;
-                    
-                    await fetch(`${API}?action=loeschePlanungen&datum=${datum}&mitarbeiter=${encodeURIComponent(currentUser)}`);
-                    
-                    // Neu laden nach 2 Sekunden
+                    // App lädt neu - zeigt automatisch nächsten offenen Auftrag
                     setTimeout(() => {
                         location.reload();
                     }, 2000);
